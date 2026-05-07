@@ -1,12 +1,18 @@
 'use client'
 
 // ============================================================
-//  ZYNAPSE — ONBOARDING PAGE (FIXED - Zero Errors)
+//  ZYNAPSE — ONBOARDING PAGE (WITH REAL IMAGES)
 //  File location: app/onboarding/page.tsx
-//  Replace your entire current file with this
+//
+//  BEFORE THIS WORKS — put these images in /public/images/:
+//  ✅ Body-Builder.png  → used on splash screen
+//  ✅ Ectomorph.png     → used on body type screen
+//  ✅ Mesomorph.png     → used on body type screen
+//  ✅ Endomorph.png     → used on body type screen
 // ============================================================
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import {
@@ -177,10 +183,31 @@ const LIFESTYLES: {
   },
 ]
 
-const BODY_TYPES: { id: BodyType; label: string; sub: string }[] = [
-  { id: 'ectomorph', label: 'Ectomorph', sub: 'Lean · Hard gainer' },
-  { id: 'mesomorph', label: 'Mesomorph', sub: 'Athletic · Naturally fit' },
-  { id: 'endomorph', label: 'Endomorph', sub: 'Stronger · Builds easier' },
+// ── Body type cards with REAL image paths ──────────────────────
+const BODY_TYPES: {
+  id: BodyType
+  label: string
+  sub: string
+  image: string       // ← path inside /public/images/
+}[] = [
+  {
+    id: 'ectomorph',
+    label: 'Ectomorph',
+    sub: 'Lean · Hard gainer',
+    image: '/images/Ectomorph.png',
+  },
+  {
+    id: 'mesomorph',
+    label: 'Mesomorph',
+    sub: 'Athletic · Naturally fit',
+    image: '/images/Mesomorph.png',
+  },
+  {
+    id: 'endomorph',
+    label: 'Endomorph',
+    sub: 'Stronger · Builds easier',
+    image: '/images/Endomorph.png',
+  },
 ]
 
 const COMPLETION_STEPS = [
@@ -388,75 +415,40 @@ export default function OnboardingPage() {
                 </div>
               </motion.div>
 
-              {/* Hero SVG */}
+              {/* ── HERO IMAGE — Body-Builder.png ─────────────────
+                  This replaces the old SVG dummy figure.
+                  The image fills the card with a gradient overlay
+                  so the text below stays readable.
+              ─────────────────────────────────────────────────── */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.6 }}
-                className="w-full h-56 mb-8 relative flex items-center justify-center"
+                transition={{ delay: 0.15, duration: 0.6 }}
+                className="w-full relative rounded-3xl overflow-hidden mb-8"
+                style={{ height: 320 }}
               >
+                <Image
+                  src="/images/Body-Builder.png"
+                  alt="Zynapse fitness"
+                  fill
+                  className="object-cover object-top"
+                  priority
+                />
+                {/* Dark gradient fade at bottom so text is readable */}
                 <div
-                  className="absolute w-48 h-48 rounded-full opacity-20"
+                  className="absolute inset-0"
                   style={{
                     background:
-                      'radial-gradient(circle, #C8FF00 0%, transparent 70%)',
+                      'linear-gradient(to bottom, rgba(10,10,10,0) 30%, rgba(10,10,10,0.95) 100%)',
                   }}
                 />
-                <svg
-                  width="140"
-                  height="200"
-                  viewBox="0 0 140 200"
-                  fill="none"
-                >
-                  <ellipse cx="70" cy="30" rx="20" ry="22" fill="#333" />
-                  <rect
-                    x="45"
-                    y="52"
-                    width="50"
-                    height="70"
-                    rx="8"
-                    fill="#222"
-                  />
-                  <rect
-                    x="20"
-                    y="55"
-                    width="22"
-                    height="55"
-                    rx="8"
-                    fill="#1a1a1a"
-                  />
-                  <rect
-                    x="98"
-                    y="55"
-                    width="22"
-                    height="55"
-                    rx="8"
-                    fill="#1a1a1a"
-                  />
-                  <rect
-                    x="46"
-                    y="122"
-                    width="20"
-                    height="60"
-                    rx="8"
-                    fill="#1a1a1a"
-                  />
-                  <rect
-                    x="74"
-                    y="122"
-                    width="20"
-                    height="60"
-                    rx="8"
-                    fill="#1a1a1a"
-                  />
-                  <path
-                    d="M 70 52 Q 95 87 70 122 Q 45 87 70 52"
-                    stroke="#C8FF00"
-                    strokeWidth="1.5"
-                    fill="none"
-                    opacity="0.6"
-                  />
-                </svg>
+                {/* Lime glow ring — matches the green rings in your image */}
+                <div
+                  className="absolute inset-0 rounded-3xl"
+                  style={{
+                    boxShadow: 'inset 0 0 60px rgba(200,255,0,0.08)',
+                  }}
+                />
               </motion.div>
 
               {/* Headline */}
@@ -950,6 +942,8 @@ export default function OnboardingPage() {
 
           {/* ══════════════════════════════════════
               STEP 4 — BODY TYPE
+              Uses: Ectomorph.png, Mesomorph.png, Endomorph.png
+              Real photos replace the old SVG shapes
           ══════════════════════════════════════ */}
           {step === 4 && (
             <motion.div
@@ -967,8 +961,7 @@ export default function OnboardingPage() {
                 className="mb-8"
               >
                 <h2 className="text-3xl font-extrabold text-white mb-2">
-                  Select your{' '}
-                  <span style={{ color: LIME }}>body type</span>
+                  Select your <span style={{ color: LIME }}>body type</span>
                 </h2>
                 <p style={{ color: MUTED }}>
                   We&apos;ll tailor workouts and nutrition for you.
@@ -992,7 +985,7 @@ export default function OnboardingPage() {
                           body_type: bt.id,
                         }))
                       }
-                      className="flex flex-col items-center gap-3 p-4 rounded-2xl transition-all"
+                      className="flex flex-col items-center rounded-2xl overflow-hidden transition-all"
                       style={{
                         background: isSelected
                           ? 'rgba(200,255,0,0.10)'
@@ -1000,20 +993,45 @@ export default function OnboardingPage() {
                         border: `2px solid ${isSelected ? LIME : BORDER}`,
                       }}
                     >
-                      <BodySilhouette type={bt.id} selected={isSelected} />
-                      <div>
+                      {/* ── Real photo ──────────────────────── */}
+                      <div className="w-full relative" style={{ height: 140 }}>
+                        <Image
+                          src={bt.image}
+                          alt={bt.label}
+                          fill
+                          className="object-cover object-top"
+                        />
+                        {/* Dark overlay — lighter when selected */}
                         <div
-                          className="text-xs font-bold mb-1 text-center"
+                          className="absolute inset-0 transition-all"
+                          style={{
+                            background: isSelected
+                              ? 'rgba(10,10,10,0.15)'
+                              : 'rgba(10,10,10,0.55)',
+                          }}
+                        />
+                        {/* Lime tint glow on selected */}
+                        {isSelected && (
+                          <div
+                            className="absolute inset-0"
+                            style={{
+                              background:
+                                'linear-gradient(to bottom, rgba(200,255,0,0.08) 0%, rgba(200,255,0,0.0) 100%)',
+                            }}
+                          />
+                        )}
+                      </div>
+
+                      {/* Label below photo */}
+                      <div className="p-2 w-full text-center">
+                        <div
+                          className="text-xs font-bold mb-0.5"
                           style={{ color: isSelected ? LIME : '#ccc' }}
                         >
                           {bt.label}
                         </div>
                         {bt.sub.split('·').map((s, idx) => (
-                          <div
-                            key={idx}
-                            className="text-xs text-center"
-                            style={{ color: '#666' }}
-                          >
+                          <div key={idx} className="text-xs leading-tight" style={{ color: '#666' }}>
                             {s.trim()}
                           </div>
                         ))}
@@ -1202,53 +1220,6 @@ function ContinueButton({
   )
 }
 
-function BodySilhouette({
-  type,
-  selected,
-}: {
-  type: string
-  selected: boolean
-}) {
-  const color = selected ? '#C8FF00' : '#444'
-
-  if (type === 'ectomorph') {
-    return (
-      <svg width="50" height="80" viewBox="0 0 50 80" fill="none">
-        <ellipse cx="25" cy="10" rx="9" ry="10" fill={color} opacity="0.8" />
-        <rect x="18" y="20" width="14" height="28" rx="4" fill={color} opacity="0.6" />
-        <rect x="8" y="22" width="8" height="20" rx="4" fill={color} opacity="0.4" />
-        <rect x="34" y="22" width="8" height="20" rx="4" fill={color} opacity="0.4" />
-        <rect x="19" y="48" width="6" height="24" rx="4" fill={color} opacity="0.5" />
-        <rect x="27" y="48" width="6" height="24" rx="4" fill={color} opacity="0.5" />
-      </svg>
-    )
-  }
-
-  if (type === 'mesomorph') {
-    return (
-      <svg width="50" height="80" viewBox="0 0 50 80" fill="none">
-        <ellipse cx="25" cy="10" rx="10" ry="10" fill={color} opacity="0.9" />
-        <path d="M13 20 L37 20 L33 48 L17 48 Z" fill={color} opacity="0.7" />
-        <rect x="5" y="22" width="9" height="22" rx="4" fill={color} opacity="0.5" />
-        <rect x="36" y="22" width="9" height="22" rx="4" fill={color} opacity="0.5" />
-        <rect x="17" y="48" width="7" height="24" rx="4" fill={color} opacity="0.6" />
-        <rect x="26" y="48" width="7" height="24" rx="4" fill={color} opacity="0.6" />
-      </svg>
-    )
-  }
-
-  if (type === 'endomorph') {
-    return (
-      <svg width="50" height="80" viewBox="0 0 50 80" fill="none">
-        <ellipse cx="25" cy="10" rx="11" ry="10" fill={color} opacity="0.8" />
-        <ellipse cx="25" cy="35" rx="16" ry="16" fill={color} opacity="0.6" />
-        <rect x="4" y="22" width="10" height="22" rx="5" fill={color} opacity="0.4" />
-        <rect x="36" y="22" width="10" height="22" rx="5" fill={color} opacity="0.4" />
-        <rect x="17" y="50" width="7" height="22" rx="4" fill={color} opacity="0.5" />
-        <rect x="26" y="50" width="7" height="22" rx="4" fill={color} opacity="0.5" />
-      </svg>
-    )
-  }
-
-  return null
-}
+// ============================================================
+//  END OF FILE
+// ============================================================
