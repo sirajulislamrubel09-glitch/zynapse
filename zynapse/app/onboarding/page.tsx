@@ -342,7 +342,7 @@ export default function OnboardingPage() {
   // ============================================================
   return (
     <div
-      className="min-h-screen w-full flex flex-col items-center justify-center overflow-hidden"
+      className="min-h-[100svh] w-full flex flex-col items-start justify-start overflow-hidden"
       style={{ background: BG, fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
     >
       {/* Google Fonts - Space Grotesk for modern, classy look */}
@@ -379,7 +379,7 @@ export default function OnboardingPage() {
       )}
 
       {/* Step Container */}
-      <div className="w-full max-w-md px-6 py-12 relative">
+      <div className="w-full h-[100svh] px-0 py-0 relative overflow-hidden">
         <AnimatePresence mode="wait">
 
           {/* ══════════════════════════════════════
@@ -394,106 +394,89 @@ export default function OnboardingPage() {
               exit="exit"
               className="flex flex-col items-start"
             >
-              {/* Logo */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                className="mb-10"
-              >
-                <div
-                  className="flex items-center gap-2 text-2xl font-bold"
-                  style={{ color: LIME }}
-                >
-                  <div
-                    className="w-8 h-8 flex items-center justify-center rounded"
-                    style={{ background: LIME, color: BG }}
-                  >
-                    <Zap size={18} />
-                  </div>
-                  ZYNAPSE
-                </div>
-              </motion.div>
-
-              {/* ── HERO IMAGE — Body-Builder.png ─────────────────
-                  This replaces the old SVG dummy figure.
-                  The image fills the card with a gradient overlay
-                  so the text below stays readable.
+              {/* ── HERO IMAGE — body-builder-2.png ─────────────────
+                  Full-screen splash with top-left logo and bottom text overlay.
               ─────────────────────────────────────────────────── */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15, duration: 0.6 }}
-                className="w-full relative rounded-3xl overflow-hidden mb-8"
-                style={{ height: 320 }}
+                className="w-full relative overflow-hidden mb-0"
+                style={{ height: '100svh', maxHeight: '100svh' }}
               >
                 <Image
-                  src="/images/Body-Builder.png"
+                  src="/images/body-builder-2.png"
                   alt="Zynapse fitness"
                   fill
-                  className="object-cover object-top"
+                  className="object-cover object-center"
                   priority
                 />
-                {/* Dark gradient fade at bottom so text is readable */}
                 <div
                   className="absolute inset-0"
                   style={{
                     background:
-                      'linear-gradient(to bottom, rgba(10,10,10,0) 30%, rgba(10,10,10,0.95) 100%)',
+                      'linear-gradient(to bottom, rgba(10,10,10,0.22) 0%, rgba(10,10,10,0.45) 35%, rgba(10,10,10,0.95) 100%)',
                   }}
                 />
-                {/* Lime glow ring — matches the green rings in your image */}
+                <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 80px rgba(0,0,0,0.4)' }} />
                 <div
-                  className="absolute inset-0 rounded-3xl"
+                  className="absolute inset-0"
                   style={{
-                    boxShadow: 'inset 0 0 60px rgba(200,255,0,0.08)',
+                    background:
+                      'radial-gradient(circle at 50% 35%, rgba(200,255,0,0.12), transparent 24%)',
                   }}
                 />
+
+                <div className="absolute inset-0 px-6 pt-6 pb-8 flex flex-col justify-between">
+                  <div className="flex items-center justify-between">
+                    <div
+                      className="inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold"
+                      style={{ background: 'rgba(0,0,0,0.45)', color: '#C8FF00' }}
+                    >
+                      <Zap size={16} /> ZYNAPSE
+                    </div>
+                  </div>
+
+                  <div className="max-w-xl text-white">
+                    <h1 className="text-[2.75rem] leading-tight tracking-tight font-extrabold sm:text-[3.5rem]">
+                      Your AI-Powered{' '}
+                      <span style={{ color: LIME }}>Fitness</span>{' '}
+                      Companion
+                    </h1>
+                    <p className="mt-5 text-base leading-7 text-[#E6E6E6] sm:text-lg">
+                      Track. Train. Transform.
+                      <br />
+                      All in one intelligent ecosystem.
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex justify-center gap-2">
+                      {[0, 1, 2, 3].map((i) => (
+                        <div
+                          key={i}
+                          className="rounded-full transition-all"
+                          style={{
+                            width: i === 0 ? 24 : 8,
+                            height: 8,
+                            background: i === 0 ? LIME : '#333',
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <motion.button
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
+                      onClick={next}
+                      className="mx-auto w-full max-w-[320px] py-4 rounded-full flex items-center justify-center gap-3 text-base font-bold transition-transform active:scale-95"
+                      style={{ background: LIME, color: BG }}
+                    >
+                      Get Started <ArrowRight size={20} />
+                    </motion.button>
+                  </div>
+                </div>
               </motion.div>
-
-              {/* Headline */}
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
-              >
-                <h1 className="text-4xl font-extrabold text-white leading-tight mb-2">
-                  Your AI-Powered{' '}
-                  <span style={{ color: LIME }}>Fitness</span> Companion
-                </h1>
-                <p className="text-base mb-10" style={{ color: MUTED }}>
-                  Track. Train. Transform.
-                  <br />
-                  All in one intelligent ecosystem.
-                </p>
-              </motion.div>
-
-              {/* Dot indicators */}
-              <div className="flex gap-2 mb-8">
-                {[0, 1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="rounded-full transition-all"
-                    style={{
-                      width: i === 0 ? 24 : 8,
-                      height: 8,
-                      background: i === 0 ? LIME : '#333',
-                    }}
-                  />
-                ))}
-              </div>
-
-              {/* CTA */}
-              <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                onClick={next}
-                className="w-full py-4 rounded-2xl flex items-center justify-center gap-3 text-base font-bold transition-transform active:scale-95"
-                style={{ background: LIME, color: BG }}
-              >
-                Get Started <ArrowRight size={20} />
-              </motion.button>
             </motion.div>
           )}
 
@@ -507,7 +490,9 @@ export default function OnboardingPage() {
               initial="enter"
               animate="center"
               exit="exit"
+              className="h-[100svh] flex flex-col overflow-y-auto"
             >
+              <div className="px-6 py-12 flex flex-col justify-between h-full">
               <motion.div
                 custom={0}
                 variants={fadeUp}
@@ -610,6 +595,7 @@ export default function OnboardingPage() {
               })()}
 
               <ContinueButton onClick={next} disabled={!canContinue()} />
+              </div>
             </motion.div>
           )}
 
@@ -623,7 +609,9 @@ export default function OnboardingPage() {
               initial="enter"
               animate="center"
               exit="exit"
+              className="h-[100svh] flex flex-col overflow-y-auto"
             >
+              <div className="px-6 py-12 flex flex-col justify-between h-full">
               <motion.div
                 custom={0}
                 variants={fadeUp}
@@ -766,30 +754,57 @@ export default function OnboardingPage() {
                   initial="hidden"
                   animate="visible"
                 >
-                  <label
-                    className="block text-sm font-semibold mb-2"
-                    style={{ color: '#aaa' }}
-                  >
-                    Age
-                  </label>
-                  <div
-                    className="flex items-center gap-3 p-4 rounded-2xl"
+                  <div className="grid grid-cols-[1fr_1.2fr] items-center gap-4 p-4 rounded-2xl"
                     style={{ background: CARD, border: `2px solid ${BORDER}` }}
                   >
-                    <input
-                      type="number"
-                      value={data.age}
-                      onChange={(e) =>
-                        setData((prev) => ({
-                          ...prev,
-                          age: Number(e.target.value),
-                        }))
-                      }
-                      className="bg-transparent text-white text-lg font-bold w-full outline-none"
-                      min={10}
-                      max={100}
-                    />
-                    <span style={{ color: '#666' }}>years</span>
+                    <div>
+                      <label
+                        className="block text-sm font-semibold mb-2"
+                        style={{ color: '#aaa' }}
+                      >
+                        Age
+                      </label>
+                      <div className="flex items-end gap-2">
+                        <input
+                          type="number"
+                          value={data.age}
+                          onChange={(e) =>
+                            setData((prev) => ({
+                              ...prev,
+                              age: Number(e.target.value),
+                            }))
+                          }
+                          className="bg-transparent text-white text-lg font-bold w-20 outline-none"
+                          min={10}
+                          max={100}
+                        />
+                        <span className="text-sm" style={{ color: '#666' }}>
+                          yrs
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <div className="text-right text-xs uppercase tracking-[0.22em]"
+                        style={{ color: '#999' }}>
+                        Slide to select
+                      </div>
+                      <input
+                        type="range"
+                        min={10}
+                        max={100}
+                        step={1}
+                        value={data.age}
+                        onChange={(e) =>
+                          setData((prev) => ({
+                            ...prev,
+                            age: Number(e.target.value),
+                          }))
+                        }
+                        className="w-full h-2 rounded-full"
+                        style={{ accentColor: LIME }}
+                      />
+                    </div>
                   </div>
                 </motion.div>
 
@@ -840,6 +855,7 @@ export default function OnboardingPage() {
               <div className="mt-8">
                 <ContinueButton onClick={next} disabled={!canContinue()} />
               </div>
+              </div>
             </motion.div>
           )}
 
@@ -853,7 +869,9 @@ export default function OnboardingPage() {
               initial="enter"
               animate="center"
               exit="exit"
+              className="h-[100svh] flex flex-col overflow-y-auto"
             >
+              <div className="px-6 py-12 flex flex-col justify-between h-full">
               <motion.div
                 custom={0}
                 variants={fadeUp}
@@ -937,6 +955,7 @@ export default function OnboardingPage() {
               </div>
 
               <ContinueButton onClick={next} disabled={!canContinue()} />
+              </div>
             </motion.div>
           )}
 
@@ -952,7 +971,9 @@ export default function OnboardingPage() {
               initial="enter"
               animate="center"
               exit="exit"
+              className="h-[100svh] flex flex-col overflow-y-auto"
             >
+              <div className="px-6 py-12 flex flex-col justify-between h-full">
               <motion.div
                 custom={0}
                 variants={fadeUp}
@@ -1046,6 +1067,7 @@ export default function OnboardingPage() {
                 disabled={!canContinue()}
                 label="Continue"
               />
+              </div>
             </motion.div>
           )}
 
@@ -1059,7 +1081,7 @@ export default function OnboardingPage() {
               initial="enter"
               animate="center"
               exit="exit"
-              className="flex flex-col items-center"
+              className="h-[100svh] flex flex-col items-center justify-center px-6 py-12 overflow-y-auto"
             >
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
