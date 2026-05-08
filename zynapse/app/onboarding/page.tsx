@@ -427,7 +427,7 @@ export default function OnboardingPage() {
                   }}
                 />
 
-                <div className="absolute inset-0 px-6 pt-6 pb-8 flex flex-col justify-between">
+                <div className="absolute inset-0 px-6 pt-6 pb-8 flex flex-col">
                   <div className="flex items-center justify-between">
                     <div
                       className="inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold"
@@ -437,43 +437,45 @@ export default function OnboardingPage() {
                     </div>
                   </div>
 
-                  <div className="max-w-xl text-white">
-                    <h1 className="text-[2.75rem] leading-tight tracking-tight font-extrabold sm:text-[3.5rem]">
-                      Your AI-Powered{' '}
-                      <span style={{ color: LIME }}>Fitness</span>{' '}
-                      Companion
-                    </h1>
-                    <p className="mt-5 text-base leading-7 text-[#E6E6E6] sm:text-lg">
-                      Track. Train. Transform.
-                      <br />
-                      All in one intelligent ecosystem.
-                    </p>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex justify-center gap-2">
-                      {[0, 1, 2, 3].map((i) => (
-                        <div
-                          key={i}
-                          className="rounded-full transition-all"
-                          style={{
-                            width: i === 0 ? 24 : 8,
-                            height: 8,
-                            background: i === 0 ? LIME : '#333',
-                          }}
-                        />
-                      ))}
+                  <div className="mt-auto space-y-8">
+                    <div className="max-w-xl text-white">
+                      <h1 className="text-3xl leading-tight tracking-tight font-extrabold sm:text-4xl">
+                        Your AI-Powered{' '}
+                        <span style={{ color: LIME }}>Fitness</span>{' '}
+                        Companion
+                      </h1>
+                      <p className="mt-3 text-sm leading-6 text-[#E6E6E6] sm:text-base">
+                        Track. Train. Transform.
+                        <br />
+                        All in one intelligent ecosystem.
+                      </p>
                     </div>
-                    <motion.button
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.6 }}
-                      onClick={next}
-                      className="mx-auto w-full max-w-[320px] py-4 rounded-full flex items-center justify-center gap-3 text-base font-bold transition-transform active:scale-95"
-                      style={{ background: LIME, color: BG }}
-                    >
-                      Get Started <ArrowRight size={20} />
-                    </motion.button>
+
+                    <div className="space-y-4">
+                      <div className="flex justify-center gap-2">
+                        {[0, 1, 2, 3].map((i) => (
+                          <div
+                            key={i}
+                            className="rounded-full transition-all"
+                            style={{
+                              width: i === 0 ? 24 : 8,
+                              height: 8,
+                              background: i === 0 ? LIME : '#333',
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <motion.button
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6 }}
+                        onClick={next}
+                        className="mx-auto w-full max-w-[320px] py-4 rounded-full flex items-center justify-center gap-3 text-base font-bold transition-transform active:scale-95"
+                        style={{ background: LIME, color: BG }}
+                      >
+                        Get Started <ArrowRight size={20} />
+                      </motion.button>
+                    </div>
                   </div>
                 </div>
               </motion.div>
