@@ -343,11 +343,11 @@ export default function OnboardingPage() {
   return (
     <div
       className="min-h-screen w-full flex flex-col items-center justify-center overflow-hidden"
-      style={{ background: BG, fontFamily: "'Syne', 'Inter', sans-serif" }}
+      style={{ background: BG, fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
     >
-      {/* Google Font */}
+      {/* Google Fonts - Space Grotesk for modern, classy look */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
         * { box-sizing: border-box; }
       `}</style>
 
