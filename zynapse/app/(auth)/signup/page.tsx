@@ -1,8 +1,13 @@
 'use client'
 
 // ============================================================
-//  ZYNAPSE — SIGNUP PAGE
+//  ZYNAPSE — SIGNUP PAGE (FLOW FIXED)
 //  File location: app/(auth)/signup/page.tsx
+//
+//  Only change from your current version:
+//  handleEmailSignup now redirects to /onboarding
+//  when email confirmation is OFF in Supabase
+//  (which is the recommended dev setting)
 // ============================================================
 
 import { useState } from 'react'
@@ -41,7 +46,6 @@ const FEATURES = [
   { icon: Target,   title: 'Build Discipline',  sub: 'Detox, focus and grow'       },
 ]
 
-// Password strength checker
 function getPasswordStrength(pwd: string): {
   score: number
   label: string
@@ -53,11 +57,11 @@ function getPasswordStrength(pwd: string): {
   if (/[0-9]/.test(pwd))        score++
   if (/[^A-Za-z0-9]/.test(pwd)) score++
 
-  if (score === 0) return { score: 0, label: '',        color: BORDER }
-  if (score === 1) return { score: 1, label: 'Weak',    color: '#ff4444' }
-  if (score === 2) return { score: 2, label: 'Fair',    color: '#ffaa00' }
-  if (score === 3) return { score: 3, label: 'Good',    color: '#88cc00' }
-  return              { score: 4, label: 'Strong',      color: LIME     }
+  if (score === 0) return { score: 0, label: '',       color: BORDER    }
+  if (score === 1) return { score: 1, label: 'Weak',   color: '#ff4444' }
+  if (score === 2) return { score: 2, label: 'Fair',   color: '#ffaa00' }
+  if (score === 3) return { score: 3, label: 'Good',   color: '#88cc00' }
+  return              { score: 4, label: 'Strong',     color: LIME      }
 }
 
 // ============================================================
@@ -67,20 +71,18 @@ export default function SignupPage() {
   const router = useRouter()
   const supabase = createClient()
 
-  const [fullName, setFullName]         = useState('')
-  const [email, setEmail]               = useState('')
-  const [password, setPassword]         = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-
-  const [loading, setLoading]           = useState(false)
+  const [fullName, setFullName]           = useState('')
+  const [email, setEmail]                 = useState('')
+  const [password, setPassword]           = useState('')
+  const [showPassword, setShowPassword]   = useState(false)
+  const [loading, setLoading]             = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
-  const [error, setError]               = useState<string | null>(null)
-  const [success, setSuccess]           = useState(false)
+  const [error, setError]                 = useState<string | null>(null)
+  const [success, setSuccess]             = useState(false)
 
   const strength = getPasswordStrength(password)
 
-  // ── Auth Handlers ─────────────────────────────────────────
-
+  // ── Google signup ─────────────────────────────────────────
   async function handleGoogleSignup() {
     setGoogleLoading(true)
     setError(null)
@@ -92,6 +94,8 @@ export default function SignupPage() {
         },
       })
       if (error) setError(error.message)
+      // Google redirects to /auth/callback
+      // which already sends new users → /onboarding ✅
     } catch {
       setError('Something went wrong. Please try again.')
     } finally {
@@ -99,6 +103,7 @@ export default function SignupPage() {
     }
   }
 
+  // ── Email signup ──────────────────────────────────────────
   async function handleEmailSignup(e: React.FormEvent) {
     e.preventDefault()
     if (!fullName || !email || !password) {
@@ -114,7 +119,8 @@ export default function SignupPage() {
     setError(null)
 
     try {
-      const { error } = await supabase.auth.signUp({
+      // ── KEY CHANGE: destructure `data` so we can check for session ──
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -128,8 +134,22 @@ export default function SignupPage() {
         return
       }
 
-      // Show success — user needs to verify email
+      // ── SCENARIO 1: Email confirmation is OFF in Supabase ──
+      // User is instantly logged in (session exists immediately)
+      // → Send them straight to onboarding
+      if (data.session) {
+        router.push('/onboarding')
+        return
+      }
+
+      // ── SCENARIO 2: Email confirmation is ON in Supabase ──
+      // User must click the email link first
+      // The link goes to /auth/callback
+      // /auth/callback already checks onboarding_completed
+      // New users → /onboarding ✅  (route.ts handles this)
+      // So we just show the "check your email" screen
       setSuccess(true)
+
     } catch {
       setError('Something went wrong. Please try again.')
     } finally {
@@ -162,7 +182,8 @@ export default function SignupPage() {
           <p className="mb-6" style={{ color: SUB }}>
             We sent a verification link to{' '}
             <span className="text-white font-semibold">{email}</span>.
-            Click it to activate your account.
+            <br />
+            Click it to activate your account and start onboarding.
           </p>
           <Link
             href="/login"
@@ -177,7 +198,7 @@ export default function SignupPage() {
   }
 
   // ============================================================
-  //  RENDER
+  //  RENDER — everything below is identical to your current file
   // ============================================================
   return (
     <div
@@ -193,7 +214,7 @@ export default function SignupPage() {
         }
       `}</style>
 
-      {/* ── Left Panel ───────────────────────────────────────── */}
+      {/* ── Left Panel ─────────────────────────────────────── */}
       <div className="hidden md:flex md:w-[45%] lg:w-[50%] relative flex-col justify-between overflow-hidden">
         <div className="absolute inset-0">
           <Image
@@ -203,40 +224,21 @@ export default function SignupPage() {
             className="object-cover object-center"
             priority
           />
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                'linear-gradient(135deg, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.6) 60%, rgba(10,10,10,0.95) 100%)',
-            }}
+          <div className="absolute inset-0"
+            style={{ background: 'linear-gradient(135deg, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.6) 60%, rgba(10,10,10,0.95) 100%)' }}
           />
-          <div
-            className="absolute"
-            style={{
-              top: '15%', left: '30%',
-              width: 320, height: 320,
-              borderRadius: '50%',
-              border: '1.5px solid rgba(200,255,0,0.35)',
-              transform: 'translate(-50%, -50%)',
-            }}
+          <div className="absolute"
+            style={{ top: '15%', left: '30%', width: 320, height: 320, borderRadius: '50%',
+              border: '1.5px solid rgba(200,255,0,0.35)', transform: 'translate(-50%, -50%)' }}
           />
-          <div
-            className="absolute"
-            style={{
-              top: '15%', left: '30%',
-              width: 220, height: 220,
-              borderRadius: '50%',
-              border: '1.5px solid rgba(200,255,0,0.25)',
-              transform: 'translate(-50%, -50%)',
-            }}
+          <div className="absolute"
+            style={{ top: '15%', left: '30%', width: 220, height: 220, borderRadius: '50%',
+              border: '1.5px solid rgba(200,255,0,0.25)', transform: 'translate(-50%, -50%)' }}
           />
         </div>
 
         <div className="relative z-10 p-8">
-          <div
-            className="w-8 h-8 flex items-center justify-center rounded"
-            style={{ background: LIME }}
-          >
+          <div className="w-8 h-8 flex items-center justify-center rounded" style={{ background: LIME }}>
             <span className="text-black font-extrabold text-sm">Z</span>
           </div>
         </div>
@@ -247,10 +249,8 @@ export default function SignupPage() {
               const Icon = f.icon
               return (
                 <div key={f.title} className="flex items-center gap-3">
-                  <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: 'rgba(200,255,0,0.12)' }}
-                  >
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'rgba(200,255,0,0.12)' }}>
                     <Icon size={18} color={LIME} />
                   </div>
                   <div>
@@ -262,57 +262,34 @@ export default function SignupPage() {
             })}
           </div>
 
-          <div
-            className="p-4 rounded-2xl"
-            style={{
-              background: 'rgba(22,22,22,0.85)',
-              border: `1px solid ${BORDER}`,
-              backdropFilter: 'blur(12px)',
-            }}
-          >
+          <div className="p-4 rounded-2xl"
+            style={{ background: 'rgba(22,22,22,0.85)', border: `1px solid ${BORDER}`, backdropFilter: 'blur(12px)' }}>
             <div className="flex items-start gap-3">
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: 'rgba(200,255,0,0.12)' }}
-              >
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(200,255,0,0.12)' }}>
                 <Sparkles size={18} color={LIME} />
               </div>
               <div>
-                <div className="text-sm font-bold mb-0.5" style={{ color: LIME }}>
-                  AI-Powered
-                </div>
-                <div className="text-xs" style={{ color: SUB }}>
-                  Your personal fitness companion
-                </div>
+                <div className="text-sm font-bold mb-0.5" style={{ color: LIME }}>AI-Powered</div>
+                <div className="text-xs" style={{ color: SUB }}>Your personal fitness companion</div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Right Panel — Signup Form ─────────────────────────── */}
+      {/* ── Right Panel ────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-h-screen overflow-y-auto" style={{ background: BG }}>
-        {/* Top bar */}
         <div className="flex items-center justify-between p-6">
           <div className="flex md:hidden items-center gap-2">
-            <div
-              className="w-8 h-8 flex items-center justify-center rounded"
-              style={{ background: LIME }}
-            >
+            <div className="w-8 h-8 flex items-center justify-center rounded" style={{ background: LIME }}>
               <span className="text-black font-extrabold text-sm">Z</span>
             </div>
             <span className="text-white font-bold text-lg">ZYNAPSE</span>
           </div>
           <div className="hidden md:block" />
-          <Link
-            href="/login"
-            className="text-sm font-medium px-4 py-2 rounded-xl"
-            style={{
-              background: CARD,
-              border: `1px solid ${BORDER}`,
-              color: '#ccc',
-            }}
-          >
+          <Link href="/login" className="text-sm font-medium px-4 py-2 rounded-xl"
+            style={{ background: CARD, border: `1px solid ${BORDER}`, color: '#ccc' }}>
             Log in
           </Link>
         </div>
@@ -324,16 +301,12 @@ export default function SignupPage() {
             transition={{ duration: 0.5 }}
             className="w-full max-w-sm"
           >
-            {/* Headline */}
             <div className="mb-8">
               <h1 className="text-3xl font-extrabold text-white leading-tight mb-2">
-                Start your
-                <br />
+                Start your<br />
                 <span style={{ color: LIME }}>fitness journey</span>
               </h1>
-              <p style={{ color: SUB }}>
-                Create your free Zynapse account
-              </p>
+              <p style={{ color: SUB }}>Create your free Zynapse account</p>
             </div>
 
             {/* Error Banner */}
@@ -344,10 +317,7 @@ export default function SignupPage() {
                   animate={{ opacity: 1, y: 0, height: 'auto' }}
                   exit={{ opacity: 0, y: -8, height: 0 }}
                   className="flex items-center gap-3 p-3 rounded-xl mb-5"
-                  style={{
-                    background: 'rgba(255,80,80,0.1)',
-                    border: '1px solid rgba(255,80,80,0.3)',
-                  }}
+                  style={{ background: 'rgba(255,80,80,0.1)', border: '1px solid rgba(255,80,80,0.3)' }}
                 >
                   <AlertCircle size={16} color="#ff5050" className="flex-shrink-0" />
                   <span className="text-sm" style={{ color: '#ff5050' }}>{error}</span>
@@ -356,15 +326,13 @@ export default function SignupPage() {
             </AnimatePresence>
 
             {/* Google Button */}
-            <button
-              type="button"
-              onClick={handleGoogleSignup}
-              disabled={googleLoading}
+            <button type="button" onClick={handleGoogleSignup} disabled={googleLoading}
               className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl text-sm font-semibold text-white transition-all mb-3 active:scale-95"
               style={{ background: CARD, border: `1.5px solid ${BORDER}`, opacity: googleLoading ? 0.7 : 1 }}
             >
               {googleLoading ? (
-                <div className="w-5 h-5 rounded-full border-2 animate-spin" style={{ borderColor: '#fff', borderTopColor: 'transparent' }} />
+                <div className="w-5 h-5 rounded-full border-2 animate-spin"
+                  style={{ borderColor: '#fff', borderTopColor: 'transparent' }} />
               ) : (
                 <svg width="20" height="20" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -383,139 +351,87 @@ export default function SignupPage() {
               <div className="flex-1 h-px" style={{ background: BORDER }} />
             </div>
 
-            {/* Signup Form */}
+            {/* Form */}
             <form onSubmit={handleEmailSignup} className="space-y-4 mb-6">
               {/* Full Name */}
               <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: '#ccc' }}>
-                  Full Name
-                </label>
-                <div
-                  className="flex items-center gap-3 px-4 py-4 rounded-2xl"
-                  style={{ background: CARD, border: `1.5px solid ${fullName ? LIME : BORDER}` }}
-                >
+                <label className="block text-sm font-semibold mb-2" style={{ color: '#ccc' }}>Full Name</label>
+                <div className="flex items-center gap-3 px-4 py-4 rounded-2xl"
+                  style={{ background: CARD, border: `1.5px solid ${fullName ? LIME : BORDER}` }}>
                   <User size={17} color={fullName ? LIME : MUTED} />
-                  <input
-                    type="text"
-                    placeholder="Your full name"
-                    value={fullName}
+                  <input type="text" placeholder="Your full name" value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="flex-1 bg-transparent text-white text-sm outline-none placeholder-gray-600"
-                    required
-                  />
+                    className="flex-1 bg-transparent text-white text-sm outline-none placeholder-gray-600" required />
                 </div>
               </div>
 
               {/* Email */}
               <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: '#ccc' }}>
-                  Email
-                </label>
-                <div
-                  className="flex items-center gap-3 px-4 py-4 rounded-2xl"
-                  style={{ background: CARD, border: `1.5px solid ${email ? LIME : BORDER}` }}
-                >
+                <label className="block text-sm font-semibold mb-2" style={{ color: '#ccc' }}>Email</label>
+                <div className="flex items-center gap-3 px-4 py-4 rounded-2xl"
+                  style={{ background: CARD, border: `1.5px solid ${email ? LIME : BORDER}` }}>
                   <Mail size={17} color={email ? LIME : MUTED} />
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
+                  <input type="email" placeholder="Enter your email" value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="flex-1 bg-transparent text-white text-sm outline-none placeholder-gray-600"
-                    autoComplete="email"
-                    required
-                  />
+                    autoComplete="email" required />
                 </div>
               </div>
 
               {/* Password */}
               <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: '#ccc' }}>
-                  Password
-                </label>
-                <div
-                  className="flex items-center gap-3 px-4 py-4 rounded-2xl"
-                  style={{ background: CARD, border: `1.5px solid ${password ? LIME : BORDER}` }}
-                >
+                <label className="block text-sm font-semibold mb-2" style={{ color: '#ccc' }}>Password</label>
+                <div className="flex items-center gap-3 px-4 py-4 rounded-2xl"
+                  style={{ background: CARD, border: `1.5px solid ${password ? LIME : BORDER}` }}>
                   <Lock size={17} color={password ? LIME : MUTED} />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Min. 8 characters"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                  <input type={showPassword ? 'text' : 'password'} placeholder="Min. 8 characters"
+                    value={password} onChange={(e) => setPassword(e.target.value)}
                     className="flex-1 bg-transparent text-white text-sm outline-none placeholder-gray-600"
-                    autoComplete="new-password"
-                    required
-                  />
+                    autoComplete="new-password" required />
                   <button type="button" onClick={() => setShowPassword((s) => !s)}>
                     {showPassword ? <EyeOff size={17} color={MUTED} /> : <Eye size={17} color={MUTED} />}
                   </button>
                 </div>
-
-                {/* Password strength bar */}
                 {password.length > 0 && (
                   <div className="mt-2">
                     <div className="flex gap-1 mb-1">
                       {[1, 2, 3, 4].map((i) => (
-                        <div
-                          key={i}
-                          className="flex-1 h-1 rounded-full transition-all"
-                          style={{
-                            background: i <= strength.score ? strength.color : BORDER,
-                          }}
-                        />
+                        <div key={i} className="flex-1 h-1 rounded-full transition-all"
+                          style={{ background: i <= strength.score ? strength.color : BORDER }} />
                       ))}
                     </div>
                     {strength.label && (
-                      <span className="text-xs" style={{ color: strength.color }}>
-                        {strength.label} password
-                      </span>
+                      <span className="text-xs" style={{ color: strength.color }}>{strength.label} password</span>
                     )}
                   </div>
                 )}
               </div>
 
-              {/* Create Account Button */}
-              <button
-                type="submit"
-                disabled={loading}
+              {/* Submit */}
+              <button type="submit" disabled={loading}
                 className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl text-base font-bold transition-all active:scale-95"
-                style={{
-                  background: loading ? '#a0cc00' : LIME,
-                  color: BG,
-                  opacity: loading ? 0.8 : 1,
-                }}
+                style={{ background: loading ? '#a0cc00' : LIME, color: BG, opacity: loading ? 0.8 : 1 }}
               >
                 {loading ? (
                   <>
-                    <div
-                      className="w-5 h-5 rounded-full border-2 animate-spin"
-                      style={{ borderColor: BG, borderTopColor: 'transparent' }}
-                    />
+                    <div className="w-5 h-5 rounded-full border-2 animate-spin"
+                      style={{ borderColor: BG, borderTopColor: 'transparent' }} />
                     Creating account...
                   </>
                 ) : (
-                  <>
-                    Create Account <ArrowRight size={20} />
-                  </>
+                  <>Create Account <ArrowRight size={20} /></>
                 )}
               </button>
             </form>
 
-            {/* Login link */}
             <p className="text-sm text-center mb-6" style={{ color: SUB }}>
               Already have an account?{' '}
-              <Link href="/login" className="font-bold" style={{ color: LIME }}>
-                Log in
-              </Link>
+              <Link href="/login" className="font-bold" style={{ color: LIME }}>Log in</Link>
             </p>
 
-            {/* Security badge */}
             <div className="flex items-center justify-center gap-2">
               <ShieldCheck size={16} color={MUTED} />
-              <span className="text-xs" style={{ color: MUTED }}>
-                Your data is secure with us
-              </span>
+              <span className="text-xs" style={{ color: MUTED }}>Your data is secure with us</span>
             </div>
           </motion.div>
         </div>
