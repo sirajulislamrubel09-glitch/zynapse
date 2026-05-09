@@ -1,1 +1,63 @@
-<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+
+    <linearGradient id="zF" x1="70" y1="60" x2="300" y2="340" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#D4FF52"/>
+      <stop offset="45%"  stop-color="#B6FF3B"/>
+      <stop offset="100%" stop-color="#7EC400"/>
+    </linearGradient>
+
+    <filter id="zGl" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="b"/>
+      <feColorMatrix in="b" type="matrix"
+        values="0.4 1   0   0 0
+                0.8 1.5 0.1 0 0
+                0   0.2 0   0 0
+                0   0   0   0.45 0" result="cb"/>
+      <feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="nGl" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="sGl" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+  </defs>
+
+  <!-- NO BACKGROUND — fully transparent -->
+
+  <!-- Z MARK -->
+  <g filter="url(#zGl)">
+    <polygon points="70,78  322,78  356,112  104,112  70,112" fill="url(#zF)"/>
+    <polygon points="322,78  356,112  98,288  64,288"          fill="url(#zF)"/>
+    <polygon points="64,288  98,288  330,322  98,322"          fill="url(#zF)"/>
+    <polygon points="64,288  98,322  330,322  330,288"         fill="url(#zF)"/>
+  </g>
+
+  <!-- SYNAPSE ENERGY ARC -->
+  <path
+    d="M 356,112 Q 310,162 274,200"
+    stroke="#72F2FF" stroke-width="2.8" stroke-linecap="round"
+    fill="none" opacity="0.72" filter="url(#nGl)"
+  />
+
+  <!-- TOP-RIGHT NODE — cyan -->
+  <circle cx="356" cy="112" r="9"   fill="#72F2FF" opacity="0.95" filter="url(#nGl)"/>
+  <circle cx="356" cy="112" r="4"   fill="#E6FBFF"/>
+
+  <!-- BOTTOM-LEFT NODE — lime -->
+  <circle cx="64"  cy="288" r="7.5" fill="#B6FF3B" opacity="0.92" filter="url(#sGl)"/>
+  <circle cx="64"  cy="288" r="3.2" fill="#EEFFC4"/>
+
+  <!-- micro filament -->
+  <line x1="64" y1="288" x2="42" y2="266"
+        stroke="#72F2FF" stroke-width="1.6"
+        stroke-linecap="round" opacity="0.35" filter="url(#sGl)"/>
+  <circle cx="42" cy="266" r="3" fill="#72F2FF" opacity="0.28"/>
+
+</svg>
