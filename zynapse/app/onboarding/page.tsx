@@ -17,6 +17,7 @@ import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import {
   ArrowRight,
+  ArrowLeft,
   Rocket,
   Dumbbell,
   Flame,
@@ -270,6 +271,10 @@ export default function OnboardingPage() {
     }))
   }
 
+  function back() {
+    if (step > 0) setStep((s) => s - 1)
+  }
+
   function next() {
     if (step < 5) setStep((s) => s + 1)
   }
@@ -365,6 +370,17 @@ export default function OnboardingPage() {
             transition={{ duration: 0.4, ease: 'easeOut' }}
           />
         </div>
+      )}
+
+      {/* Back Button */}
+      {step > 0 && step < 5 && (
+        <button
+          onClick={back}
+          className="fixed top-4 left-5 z-50 text-sm font-medium flex items-center gap-2"
+          style={{ color: MUTED }}
+        >
+          <ArrowLeft size={16} /> Back
+        </button>
       )}
 
       {/* Skip Button */}
