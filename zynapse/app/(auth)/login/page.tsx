@@ -152,7 +152,7 @@ export default function LoginPage() {
       className="min-h-screen w-full flex"
       style={{
         background: BG,
-        fontFamily: "'Syne', 'Inter', sans-serif",
+        fontFamily: "'Plus Jakarta Sans','Inter',sans-serif",
       }}
     >
       <style>{`

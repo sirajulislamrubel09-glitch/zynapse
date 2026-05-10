@@ -234,7 +234,7 @@ export default function DashboardPage() {
   // ════════════════════════════════════════════════════════
   return (
     <div style={{ background: BG, minHeight: '100vh', color: W,
-      fontFamily: "'Syne','Inter',sans-serif", paddingBottom: 32 }}>
+      fontFamily: "'Plus Jakarta Sans','Inter',sans-serif", paddingBottom: 32 }}>
 
       {/* ═══════════════════════════════════════════════════
           HEADER

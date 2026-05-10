@@ -203,7 +203,7 @@ export default function SignupPage() {
   return (
     <div
       className="min-h-screen w-full flex"
-      style={{ background: BG, fontFamily: "'Syne', 'Inter', sans-serif" }}
+      style={{ background: BG, fontFamily: "'Plus Jakarta Sans','Inter',sans-serif" }}
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap');

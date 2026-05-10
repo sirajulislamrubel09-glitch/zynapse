@@ -5,14 +5,13 @@
 // ============================================================
 
 import type { Metadata, Viewport } from 'next'
-import { Syne } from 'next/font/google'
+import { Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 
-// Syne font — matches our design system
-const syne = Syne({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-syne',
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-jakarta',
   display: 'swap',
 })
 
@@ -46,14 +45,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={syne.variable}>
+    <html lang="en" className={jakarta.variable}>
       <body
         style={{
           margin: 0,
           padding: 0,
           background: '#080808',
           overflowX: 'hidden',
-          fontFamily: 'var(--font-syne), Inter, sans-serif',
+          fontFamily: 'var(--font-jakarta), Inter, sans-serif',
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',
         }}
