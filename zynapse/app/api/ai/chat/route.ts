@@ -73,10 +73,12 @@ export async function POST(request: Request) {
         return NextResponse.json({ limitReached: true })
       }
 
-      await supabase.from('ai_chat_logs').insert({
-        user_id: user.id,
-        message_preview: message.slice(0, 50),
-      }).catch(() => {})
+      try {
+        await supabase.from('ai_chat_logs').insert({
+          user_id: user.id,
+          message_preview: message.slice(0, 50),
+        })
+      } catch { /* table may not exist yet — non-fatal */ }
     }
 
     const systemPrompt = buildSystemPrompt(profile, context ?? {})
