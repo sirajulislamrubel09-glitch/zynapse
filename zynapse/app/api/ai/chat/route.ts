@@ -1,62 +1,35 @@
 // ============================================================
-//  ZYNAPSE — AI CHAT API ROUTE
-//  File: app/api/ai/chat/route.ts
+//  ZYNAPSE — AI CHAT API (STREAMING + FALLBACK)
+//  app/api/ai/chat/route.ts
 // ============================================================
 
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { aiChat, aiStream, type ChatMessage } from '@/lib/ai/provider'
 
-const GROQ_KEYS = [
-  process.env.GROQ_API_KEY_1,
-  process.env.GROQ_API_KEY_2,
-  process.env.GROQ_API_KEY_3,
-  process.env.GROQ_API_KEY_4,
-  process.env.GROQ_API_KEY_5,
-].filter(Boolean) as string[]
+function buildSystemPrompt(profile: {
+  full_name?: string
+  fitness_goal?: string
+  daily_calorie_goal?: number
+} | null, context: Record<string, unknown>) {
+  const name = profile?.full_name?.split(' ')[0] ?? 'Champion'
+  const goal = profile?.fitness_goal?.replace(/_/g, ' ') ?? 'fitness'
+  const kcalGoal = profile?.daily_calorie_goal ?? 2000
 
-let keyIdx = 0
+  return `You are Zynapse AI — a sharp, direct, world-class personal fitness coach.
 
-async function groq(messages: object[], retries = 0): Promise<string> {
-  if (!GROQ_KEYS.length || retries >= GROQ_KEYS.length) {
-    return "I'm recharging. Try again in a moment."
-  }
+User: ${name}
+Goal: ${goal}
+Daily calorie target: ${kcalGoal} kcal
+Live data: ${JSON.stringify(context)}
 
-  const key = GROQ_KEYS[keyIdx % GROQ_KEYS.length]
-  keyIdx++
-
-  try {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${key}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'llama3-8b-8192',
-        messages,
-        max_tokens: 200,
-        temperature: 0.75,
-      }),
-    })
-
-    if (res.status === 429 || res.status === 401) {
-      return groq(messages, retries + 1)
-    }
-
-    if (!res.ok) {
-      return groq(messages, retries + 1)
-    }
-
-    const data = await res.json()
-
-    return (
-      data.choices?.[0]?.message?.content?.trim() ??
-      "Let's get after it."
-    )
-  } catch {
-    return groq(messages, retries + 1)
-  }
+Rules:
+- Max 3 sentences. Be direct and specific.
+- No generic advice. Reference their actual numbers.
+- Sound like a coach who knows them personally.
+- If off-topic, redirect to fitness/health/mindset.
+- No filler phrases. Every word earns its place.`
 }
 
 export async function POST(request: Request) {
@@ -74,15 +47,12 @@ export async function POST(request: Request) {
       }
     )
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { message, context } = await request.json()
+    const { message, context, history, stream: wantStream } = await request.json()
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -90,49 +60,67 @@ export async function POST(request: Request) {
       .eq('id', user.id)
       .single()
 
+    // Free user daily limit check
     if (!profile?.is_premium) {
       const today = new Date().toISOString().split('T')[0]
-
       const { count } = await supabase
-        .from('focus_sessions')
+        .from('ai_chat_logs')
         .select('id', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .eq('session_type', 'focus')
         .gte('created_at', `${today}T00:00:00`)
 
       if ((count ?? 0) >= 5) {
         return NextResponse.json({ limitReached: true })
       }
+
+      await supabase.from('ai_chat_logs').insert({
+        user_id: user.id,
+        message_preview: message.slice(0, 50),
+      }).catch(() => {})
     }
 
-    const systemPrompt = `You are Zynapse AI — a sharp, direct, world-class personal fitness coach.
-User: ${profile?.full_name ?? 'Champion'}
-Goal: ${profile?.fitness_goal?.replace(/_/g, ' ') ?? 'fitness'}
-Daily calorie target: ${profile?.daily_calorie_goal ?? 2000} kcal
-Context: ${JSON.stringify(context ?? {})}
+    const systemPrompt = buildSystemPrompt(profile, context ?? {})
 
-Rules:
-- Max 3 sentences. Be specific and direct.
-- No generic advice. Use their actual data.
-- Sound like a coach who knows them personally.
-- If they ask something off-topic, redirect to fitness/health.
-- Never say "I" too much. Focus on them.`
+    const messages: ChatMessage[] = [
+      { role: 'system', content: systemPrompt },
+      ...((history ?? []) as { role: 'user' | 'assistant'; content: string }[])
+        .slice(-6)
+        .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+      { role: 'user', content: message },
+    ]
 
-    const reply = await groq([
-      {
-        role: 'system',
-        content: systemPrompt,
-      },
-      {
-        role: 'user',
-        content: message,
-      },
-    ])
+    if (wantStream) {
+      const stream = await aiStream(messages, { maxTokens: 400 })
+      if (stream) {
+        const encoder = new TextEncoder()
+        const readable = new ReadableStream({
+          async start(controller) {
+            const reader = stream.getReader()
+            try {
+              while (true) {
+                const { done, value } = await reader.read()
+                if (done) break
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk: value })}\n\n`))
+              }
+            } finally {
+              controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+              controller.close()
+            }
+          },
+        })
+        return new Response(readable, {
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            Connection: 'keep-alive',
+          },
+        })
+      }
+    }
 
-    return NextResponse.json({ reply })
+    const result = await aiChat(messages, { maxTokens: 350 })
+    return NextResponse.json({ reply: result.text, provider: result.provider })
   } catch {
-    return NextResponse.json({
-      reply: 'Connection hiccup. Try again.',
-    })
+    return NextResponse.json({ reply: 'Connection issue — try again in a moment.' })
   }
 }

@@ -72,19 +72,6 @@ const PLANS: Record<string, { label: string; name: string; muscles: string }[]> 
   ],
 }
 
-// ─── Greeting ─────────────────────────────────────────────────
-function greet() {
-  const h = new Date().getHours()
-  if (h < 12) return 'Good Morning'
-  if (h < 17) return 'Good Afternoon'
-  return 'Good Evening'
-}
-
-// ─── Day label ────────────────────────────────────────────────
-function dayLabel() {
-  return new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
-}
-
 // ─── Calorie ring — clean SVG ────────────────────────────────
 function Ring({ pct }: { pct: number }) {
   const S = 200, sw = 10, r = (S - sw) / 2
@@ -146,6 +133,16 @@ export default function DashboardPage() {
   const [focusOn, setFocusOn]   = useState(false)
   const [secs, setSecs]         = useState(25 * 60)
   const timer                   = useRef<ReturnType<typeof setInterval> | null>(null)
+  // FIX: Hydration — date strings client-only
+  const [greetStr, setGreetStr] = useState('')
+  const [dateStr, setDateStr]   = useState('')
+
+  useEffect(() => {
+    const now = new Date()
+    const h   = now.getHours()
+    setGreetStr(h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening')
+    setDateStr(now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }))
+  }, [])
 
   // ── Timer ────────────────────────────────────────────────
   useEffect(() => {
@@ -245,7 +242,7 @@ export default function DashboardPage() {
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
           {/* Left */}
           <div>
-            <p style={{ color: G1, fontSize: 13, marginBottom: 4 }}>{greet()}</p>
+            {greetStr && <p style={{ color: G1, fontSize: 13, marginBottom: 4 }}>{greetStr},</p>}
             {loading
               ? <Sk w={130} h={32} />
               : <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -253,7 +250,7 @@ export default function DashboardPage() {
                   <Zap size={22} color={L} fill={L} />
                 </div>
             }
-            <p style={{ color: G2, fontSize: 11, marginTop: 6 }}>{dayLabel()}</p>
+            {dateStr && <p style={{ color: G2, fontSize: 11, marginTop: 6 }}>{dateStr}</p>}
           </div>
 
           {/* Right */}
