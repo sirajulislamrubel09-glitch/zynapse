@@ -319,7 +319,12 @@ export default function Page() {
 
             {/* Wordmark */}
             <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: '0.2em', color: '#fff', marginBottom: 4 }}>ZYNAPSE</h1>
+              {/* Visible brand name (aria-hidden so screen readers use the h1 below) */}
+              <p aria-hidden="true" style={{ fontSize: 22, fontWeight: 800, letterSpacing: '0.2em', color: '#fff', marginBottom: 4 }}>ZYNAPSE</p>
+              {/* SEO H1 — visually hidden but fully crawlable */}
+              <h1 style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>
+                Zynapse — AI Fitness &amp; Nutrition Coach: Workout Tracker and Meal Scanner
+              </h1>
               <p style={{ color: CYN, fontSize: 9, fontWeight: 700, letterSpacing: '0.3em', marginBottom: 18 }}>AI FOR A BETTER YOU</p>
             </motion.div>
 
