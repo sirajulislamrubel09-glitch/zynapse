@@ -32,6 +32,7 @@ type Profile = {
   daily_protein_goal_g: number
   daily_carb_goal_g: number
   daily_fat_goal_g: number
+  is_premium: boolean
 }
 type Stats = {
   kcal: number; protein: number; carbs: number; fat: number
@@ -140,8 +141,12 @@ export default function DashboardPage() {
   useEffect(() => {
     const now = new Date()
     const h   = now.getHours()
-    setGreetStr(h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening')
-    setDateStr(now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }))
+    const gStr = h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening'
+    const dStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+    requestAnimationFrame(() => {
+      setGreetStr(gStr)
+      setDateStr(dStr)
+    })
   }, [])
 
   // ── Timer ────────────────────────────────────────────────
@@ -169,7 +174,7 @@ export default function DashboardPage() {
         const today = new Date().toISOString().split('T')[0]
 
         const [pR, mR, wR, dR, fR] = await Promise.all([
-          supabase.from('profiles').select('full_name,fitness_goal,daily_calorie_goal,daily_protein_goal_g,daily_carb_goal_g,daily_fat_goal_g').eq('id', user.id).single(),
+          supabase.from('profiles').select('full_name,fitness_goal,daily_calorie_goal,daily_protein_goal_g,daily_carb_goal_g,daily_fat_goal_g,is_premium').eq('id', user.id).single(),
           supabase.from('meals').select('calories,protein_g,carbs_g,fat_g').eq('user_id', user.id).gte('logged_at', `${today}T00:00:00`),
           supabase.from('workout_logs').select('id').eq('user_id', user.id).gte('created_at', `${today}T00:00:00`),
           supabase.from('detox_logs').select('streak_current').eq('user_id', user.id).eq('status', 'active').order('streak_current', { ascending: false }).limit(1),
@@ -247,7 +252,12 @@ export default function DashboardPage() {
               ? <Sk w={130} h={32} />
               : <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <h1 style={{ fontSize: 30, fontWeight: 900, color: W, lineHeight: 1 }}>{name}</h1>
-                  <Zap size={22} color={L} fill={L} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Zap size={22} color={L} fill={L} />
+                    {profile?.is_premium && (
+                      <div style={{ padding: '3px 6px', borderRadius: 6, background: L, color: '#000', fontSize: 9, fontWeight: 900 }}>PRO</div>
+                    )}
+                  </div>
                 </div>
             }
             {dateStr && <p style={{ color: G2, fontSize: 11, marginTop: 6 }}>{dateStr}</p>}

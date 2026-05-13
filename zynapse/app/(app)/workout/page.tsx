@@ -90,7 +90,10 @@ export default function WorkoutPage() {
 
   useEffect(() => {
     const d = new Date().getDay() // 0=Sun
-    setDayOfWeek(d === 0 ? 6 : d - 1) // convert to 0=Mon
+    const dow = d === 0 ? 6 : d - 1
+    requestAnimationFrame(() => {
+      setDayOfWeek(dow) // convert to 0=Mon
+    })
   }, [])
 
   useEffect(() => {
@@ -168,11 +171,25 @@ export default function WorkoutPage() {
               <div style={{ background: C, border: `1px solid ${BD}`, borderRadius: 24, padding: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                   <span style={{ color: G1, fontSize: 10, fontWeight: 700, letterSpacing: '0.12em' }}>
-                    THIS WEEK
+                    WEEKLY VOLUME
                   </span>
                   <span style={{ color: L, fontWeight: 700, fontSize: 14 }}>
                     {Math.min(doneThisWeek, totalThisWeek)} / {totalThisWeek} Workouts
                   </span>
+                </div>
+
+                {/* Volume Chart */}
+                <div style={{ height: 60, display: 'flex', alignItems: 'flex-end', gap: 6, marginBottom: 20, padding: '0 4px' }}>
+                  {[40, 70, 50, 90, 60, 30, 0].map((v, i) => (
+                    <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                      <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ height: `${v}%` }}
+                        transition={{ duration: 1, delay: i * 0.1 }}
+                        style={{ width: '100%', background: i === dayOfWeek ? L : G2, borderRadius: 4 }}
+                      />
+                    </div>
+                  ))}
                 </div>
 
                 {/* Day dots */}
@@ -291,40 +308,46 @@ export default function WorkoutPage() {
 
               {/* Recommended for You */}
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                   <span style={{ color: G1, fontSize: 10, fontWeight: 700, letterSpacing: '0.12em' }}>
                     RECOMMENDED FOR YOU
                   </span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   {RECOMMENDED.map((r, i) => (
                     <motion.button key={r.name} type="button"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 + i * 0.07 }}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.3 + i * 0.1 }}
+                      whileTap={{ scale: 0.96 }}
                       style={{
-                        display: 'flex', alignItems: 'center', gap: 14,
-                        padding: '14px 16px', borderRadius: 20,
-                        background: C, border: `1px solid ${BD}`,
+                        display: 'flex', flexDirection: 'column', gap: 12,
+                        padding: '20px', borderRadius: 24,
+                        background: `linear-gradient(135deg, ${C} 0%, ${G2} 100%)`,
+                        border: `1px solid ${BD}`,
                         textAlign: 'left', width: '100%', cursor: 'pointer',
-                        fontFamily: FONT,
+                        fontFamily: FONT, position: 'relative', overflow: 'hidden'
                       }}>
+                      {/* Glow */}
+                      <div style={{ position: 'absolute', top: -20, right: -20, width: 60, height: 60, borderRadius: '50%', background: `${r.color}10`, filter: 'blur(20px)' }} />
+
                       <div style={{
-                        width: 52, height: 52, borderRadius: 14, flexShrink: 0,
-                        background: `${r.color}12`,
+                        width: 40, height: 40, borderRadius: 12,
+                        background: `${r.color}15`,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
-                        <Dumbbell size={20} color={r.color} />
+                        <Dumbbell size={18} color={r.color} />
                       </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ color: W, fontWeight: 600, fontSize: 15, marginBottom: 2 }}>{r.name}</div>
-                        <div style={{ color: G1, fontSize: 12 }}>{r.detail}</div>
+                      <div>
+                        <div style={{ color: W, fontWeight: 700, fontSize: 14, marginBottom: 4 }}>{r.name}</div>
+                        <div style={{ color: G1, fontSize: 11 }}>{r.detail}</div>
                       </div>
+
                       <div style={{
-                        width: 38, height: 38, borderRadius: 12, background: L,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                        marginTop: 4, display: 'flex', alignItems: 'center', gap: 4,
+                        color: L, fontSize: 11, fontWeight: 700
                       }}>
-                        <Play size={15} color="#000" fill="#000" />
+                        Start <ChevronRight size={12} />
                       </div>
                     </motion.button>
                   ))}

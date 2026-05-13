@@ -43,8 +43,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router   = useRouter()
   const [fabOpen, setFabOpen] = useState(false)
 
-  function handleAction(href: string) {
+  function handleAction(href: string, label: string) {
     setFabOpen(false)
+    if (href.includes('dashboard?checkin=1') || href.includes('action=water')) {
+      alert(`${label} coming soon! We're perfecting this feature.`)
+      return
+    }
     router.push(href)
   }
 
@@ -93,7 +97,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     transition={{ delay: (QUICK_ACTIONS.length - 1 - i) * 0.05, duration: 0.25 }}
-                    onClick={() => handleAction(item.href)}
+                    onClick={() => handleAction(item.href, item.label)}
                     type="button"
                     className="flex items-center gap-4 w-full px-5 py-4 rounded-2xl text-left transition-all active:scale-98"
                     style={{ background: 'rgba(20,20,20,0.98)', border: '1px solid rgba(255,255,255,0.08)' }}
