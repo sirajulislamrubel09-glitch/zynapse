@@ -11,6 +11,7 @@ import {
   User, Settings, Bell, HelpCircle, ChevronRight,
   Flame, Dumbbell, Clock, Zap, LogOut, Camera,
 } from 'lucide-react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
@@ -119,7 +120,14 @@ export default function ProfilePage() {
 
       {/* Header */}
       <div style={{ padding: '52px 20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <h1 style={{ fontSize: 30, fontWeight: 800, color: W }}>Profile</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <h1 style={{ fontSize: 30, fontWeight: 800, color: W }}>Profile</h1>
+          {profile?.is_premium && (
+            <div style={{ padding: '4px 8px', borderRadius: 8, background: L, color: '#000', fontSize: 10, fontWeight: 800, letterSpacing: '0.05em' }}>
+              PRO
+            </div>
+          )}
+        </div>
         <button type="button" onClick={handleSignOut}
           style={{
             width: 40, height: 40, borderRadius: 12,
@@ -197,6 +205,28 @@ export default function ProfilePage() {
             </div>
           )}
         </motion.div>
+
+        {/* Premium CTA */}
+        {!loading && !profile?.is_premium && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+            style={{
+              padding: '24px', borderRadius: 28,
+              background: `linear-gradient(135deg, ${L} 0%, #88CC00 100%)`,
+              position: 'relative', overflow: 'hidden', boxShadow: `0 12px 32px ${L}30`
+            }}
+          >
+            <div style={{ position: 'absolute', top: -20, right: -20, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', filter: 'blur(30px)' }} />
+            <Zap size={32} color="#000" fill="#000" style={{ marginBottom: 16, opacity: 0.9 }} />
+            <h3 style={{ color: '#000', fontSize: 20, fontWeight: 900, marginBottom: 8 }}>Unlock Zynapse Pro</h3>
+            <p style={{ color: 'rgba(0,0,0,0.7)', fontSize: 13, lineHeight: 1.5, marginBottom: 20, fontWeight: 500 }}>
+              Get unlimited AI coaching, advanced meal analytics, and custom workout plans.
+            </p>
+            <Link href="/profile?upgrade=1" style={{ display: 'inline-block', padding: '12px 24px', borderRadius: 14, background: '#000', color: L, fontWeight: 800, fontSize: 13, textDecoration: 'none' }}>
+              Upgrade Now
+            </Link>
+          </motion.div>
+        )}
 
         {/* Stats */}
         <motion.div

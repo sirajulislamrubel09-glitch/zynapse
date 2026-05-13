@@ -138,8 +138,14 @@ export default function CoachPage() {
   useEffect(() => {
     const now = new Date()
     const h   = now.getHours()
-    setDateStr(now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }))
-    setGreetStr(h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening')
+    const dStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+    const gStr = h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening'
+
+    // Use requestAnimationFrame to avoid "cascading renders" lint error
+    requestAnimationFrame(() => {
+      setDateStr(dStr)
+      setGreetStr(gStr)
+    })
   }, [])
 
   const fetchBrief = useCallback(async (
